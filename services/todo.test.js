@@ -6,8 +6,6 @@ const { getTodos, createTodo } = require('./todo')
 const { mockTodos } = require('./__mock__/database')
 
 async function initDefaultData() {
-  Todo.create()
-
   await Promise.all([
     Todo.create(mockTodos),
   ])
@@ -16,17 +14,28 @@ async function initDefaultData() {
 let mongod = null
 
 beforeAll(async () => {
+  // jest.setTimeout(15000)
+  // mongod = await MongoMemoryServer.create({
+  //   instance: {
+  //     launchTimeout: 100000
+  //   },
+  //   binary: {
+  //     version: '6.0.2',
+  //     arch: "x64",
+  //     platform: "linux"
+  //   }
+  // })
   mongod = await MongoMemoryServer.create()
   const dbUrl = mongod.getUri()
-
   await mongoose.connect(dbUrl)
-
   await initDefaultData()
 })
 
 afterAll(async () => {
-  await mongoose.connection.close()
-  await mongod.stop()
+  if(mongod) {
+    await mongoose.connection.close()
+    await mongod.stop()
+  }
 })
 
 describe('getTodos function', () => {
